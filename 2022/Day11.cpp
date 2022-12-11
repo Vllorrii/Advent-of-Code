@@ -6,7 +6,7 @@
 #include <algorithm>
 
 const int NUM_ROUNDS = 20; // Part 1
-// const int NUM_ROUNDS = 20; // Part 2
+// const int NUM_ROUNDS = 10000; // Part 2
 
 struct Operation {
 	Operation() : fac(1LL) {};
