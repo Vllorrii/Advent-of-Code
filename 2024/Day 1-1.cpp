@@ -6,7 +6,6 @@
 #include <algorithm>
 
 int main() {
-	int pause;
 	int answer = 0;
 
 	std::ifstream file("input.txt", std::ios::in);
