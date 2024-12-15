@@ -1,51 +1,84 @@
-#include <stdio.h>
 #include <iostream>
 #include <fstream>
-#include <map>
+#include <string>
+#include <sstream>
+#include <vector>
+#include <list>
+#include <algorithm>
+#include <chrono>
 
-inline int numdigits(long long n) {
-	int result = 0;
-	while (n > 0) {
-		++result;
-		n /= 10;
+#define SIZE 8
+
+void move(char map[SIZE][SIZE], int* currrow, int* currcol, char move) {
+	int drow = 0, nextrow;
+	int dcol = 0, nextcol;
+	switch (move) {
+	case '>': drow = 0; dcol = 1; break;
+	case '^': drow = -1; dcol = 0; break;
+	case '<': drow = 0; dcol = -1; break;
+	case 'v': drow = 1; dcol = 0; break;
 	}
-	return result;
-}
+	nextrow = *currrow + drow;
+	nextcol = *currcol + dcol;
 
-inline void split(long long n, int numdig, int* a, int* b) {
-	*b = n;
-	for (int i = 0; i < numdig; ++i) n /= 10;
-	*a = n;
-	for (int i = 0; i < numdig; ++i) n *= 10;
-	*b -= n;
+	if (map[nextrow][nextcol] == '#') return;
+	*currrow = nextrow;
+	*currcol = nextcol;
+	if (map[nextrow][nextcol] == '.') return;
+
+	int r = 0, c = 0;
+	for (r = nextrow, c = nextcol; r < 0 || r >= SIZE || c < 0 || c >= SIZE; r += drow, c += dcol) {
+		if (map[r][c] == '.') break;
+	}
+	if (r < 0 || r >= SIZE || c < 0 || c >= SIZE) return;
+	map[r][c] == 'O';
+	map[*currrow][*currcol] = '.';
 }
 
 int main() {
+	int pause;
 	long long answer = 0ll;
 
-	std::ifstream file("input.txt", std::ios::in);
+	std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
 
-	std::map<long long, long long> stones, newstones;
-	long long stone;
-	while (file >> stone) stones.insert({ stone, 1 });
+	std::ifstream file("D:\\Documents\\AdventOfCode\\input_test.txt", std::ios::in);
+
+	std::string line;
+	std::stringstream ssline;
+	char map[SIZE][SIZE], c;
+	std::vector<char> moves;
+	int row = 0, currrow = 0, currcol = 0;
+	while (std::getline(file, line)) {
+		if (line.empty()) break;
+		for (size_t i = 0; i < line.size(); ++i) {
+			map[row][i] = line[i];
+			if (line[i] == '@') {
+				currrow = row;
+				currcol = i;
+				map[row][i] = '.';
+			}
+		}
+		++row;
+	}
+	while ((c = file.get()) != EOF) moves.push_back(c);
+
 	file.close();
 
-	int numdig, left, right;
-	for (int blink = 0; blink < 75; ++blink) {
-		newstones.clear();
-		for (std::map<long long, long long>::iterator it = stones.begin(); it != stones.end(); ++it) {
-			if (it->first == 0) newstones[1] += it->second;
-			else if ((numdig = numdigits(it->first)) % 2 == 0) {
-				split(it->first, numdig / 2, &left, &right);
-				newstones[left] += it->second;
-				newstones[right] += it->second;
+	for (size_t i = 0; i < moves.size(); ++i) move(map, &currrow, &currcol, moves[i]);
+
+	for (size_t row = 0; row < SIZE; ++row) {
+		for (size_t col = 0; col < SIZE; ++col) {
+			if (map[row][col] == 'O') {
+				answer += 100ll * row + col;
 			}
-			else newstones[it->first * 2024] += it->second;
 		}
-		stones = newstones;
 	}
 
-	for (std::map<long long, long long>::iterator it = stones.begin(); it != stones.end(); ++it) { answer += it->second;
+end:
+	std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
 
+	std::cout << "Answer: " << answer << std::endl;
+	std::cout << "Compute: " << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << "ms" << std::endl;
+	std::cin >> pause;
 	return 0;
 }
