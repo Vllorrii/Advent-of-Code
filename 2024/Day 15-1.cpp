@@ -1,13 +1,10 @@
+#include <stdio.h>
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <sstream>
 #include <vector>
-#include <list>
-#include <algorithm>
-#include <chrono>
 
-#define SIZE 8
+#define SIZE 50
 
 void move(char map[SIZE][SIZE], int* currrow, int* currcol, char move) {
 	int drow = 0, nextrow;
@@ -22,31 +19,29 @@ void move(char map[SIZE][SIZE], int* currrow, int* currcol, char move) {
 	nextcol = *currcol + dcol;
 
 	if (map[nextrow][nextcol] == '#') return;
-	*currrow = nextrow;
-	*currcol = nextcol;
-	if (map[nextrow][nextcol] == '.') return;
+	if (map[nextrow][nextcol] == '.') {
+		*currrow = nextrow;
+		*currcol = nextcol;
+		return;
+	}
 
 	int r = 0, c = 0;
-	for (r = nextrow, c = nextcol; r < 0 || r >= SIZE || c < 0 || c >= SIZE; r += drow, c += dcol) {
-		if (map[r][c] == '.') break;
-	}
-	if (r < 0 || r >= SIZE || c < 0 || c >= SIZE) return;
-	map[r][c] == 'O';
+	for (r = nextrow, c = nextcol; map[r][c] != '.' && map[r][c] != '#'; r += drow, c += dcol);
+	if (map[r][c] == '#') return;
+	map[r][c] = 'O';
+	*currrow = nextrow;
+	*currcol = nextcol;
 	map[*currrow][*currcol] = '.';
 }
 
 int main() {
-	int pause;
 	long long answer = 0ll;
 
-	std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
-
-	std::ifstream file("D:\\Documents\\AdventOfCode\\input_test.txt", std::ios::in);
+	std::ifstream file("input.txt", std::ios::in);
 
 	std::string line;
-	std::stringstream ssline;
 	char map[SIZE][SIZE], c;
-	std::vector<char> moves;
+	std::string moves;
 	int row = 0, currrow = 0, currcol = 0;
 	while (std::getline(file, line)) {
 		if (line.empty()) break;
@@ -60,7 +55,7 @@ int main() {
 		}
 		++row;
 	}
-	while ((c = file.get()) != EOF) moves.push_back(c);
+	while (std::getline(file, line)) moves.append(line);
 
 	file.close();
 
@@ -74,11 +69,7 @@ int main() {
 		}
 	}
 
-end:
-	std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
+	file.close();
 
-	std::cout << "Answer: " << answer << std::endl;
-	std::cout << "Compute: " << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << "ms" << std::endl;
-	std::cin >> pause;
 	return 0;
 }
